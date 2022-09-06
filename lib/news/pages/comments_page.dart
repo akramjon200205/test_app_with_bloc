@@ -1,0 +1,215 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/coments_model.dart';
+import 'package:flutter_application_1/news/bloc/comments_bloc.dart';
+import 'package:flutter_application_1/news/pages/show_result_page.dart';
+import 'package:flutter_application_1/utills/constants.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class CommentsPage extends StatefulWidget {
+  CommentsPage({required this.string, required this.bodys, required this.id, super.key});
+
+  String string;
+  String bodys;
+  int id;
+
+  @override
+  State<CommentsPage> createState() => _CommentsPageState();
+}
+
+class _CommentsPageState extends State<CommentsPage> {
+  List<CommentsModel> listOnTapContainerModel = [];
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    return BlocBuilder<CommentsBloc, CommentsState>(builder: (context, state) {
+      if (state is CommentsInitial) {
+        context.read<CommentsBloc>().add(const CommentsEventLoad());
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+      if (state is CommentsInitial) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+      if (state is CommentsStateCompleted) {
+        List<CommentsModel> list = state.listComments;
+        return Scaffold(
+          backgroundColor: backgroundColor,
+          appBar: AppBar(
+            backgroundColor: Colors.indigo[900],
+            centerTitle: true,
+            title: Text(
+              widget.string,
+              style: kTextStyle(
+                size: 20,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  widget.bodys,
+                  style: kTextStyle(
+                    size: 12,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Expanded(
+                  child: ListView(
+                    children: [
+                      _itemConainer(
+                        size,
+                        0,
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      _itemConainer(
+                        size,
+                        1,
+                      ),
+                    ],
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ShowResult(
+                            text: widget.string,
+                            id: widget.id,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        height: size.height * 0.08,
+                        width: double.infinity,
+                        padding: const EdgeInsets.only(left: 20, right: 25),
+                        decoration: BoxDecoration(
+                          color: Colors.indigo,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Show me 5 result",
+                              style: kTextStyle(
+                                size: 20,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            const Icon(
+                              Icons.remove_red_eye,
+                              size: 25,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      } else {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+    });
+  }
+
+  Widget _itemConainer(
+    Size size,
+    int number,
+  ) {
+    List numbers = [];
+    for (int i = widget.id * 5; i <= widget.id * 5 + 1; i++) {
+      numbers.add(i);
+    }
+    return BlocBuilder<CommentsBloc, CommentsState>(
+      builder: (context, state) {
+        if (state is CommentsInitial) {
+          context.read<CommentsBloc>().add(const CommentsEventLoad());
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (state is CommentsInitial) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (state is CommentsStateCompleted) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            height: size.height * 0.2,
+            width: size.width * 0.95,
+            decoration: BoxDecoration(
+              color: Colors.indigo[800],
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ListTile(
+                  leading: const CircleAvatar(
+                    radius: 20,
+                    child: Icon(
+                      Icons.person,
+                      size: 20,
+                    ),
+                  ),
+                  title: Text(
+                    "${state.listComments[numbers[number]].name}",
+                    style: kTextStyle(
+                      size: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ),
+                Text(
+                  "${state.listComments[numbers[number]].body}",
+                  style: kTextStyle(
+                    size: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
+    );
+  }
+}
